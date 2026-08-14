@@ -3,16 +3,17 @@ import 'package:flutter/material.dart';
 class AppIcons {
   AppIcons._();
 
-  static const IconData newTest = Icons.auto_awesome;
+  static const IconData collectionsBookmark =
+      Icons.collections_bookmark_outlined;
 
-  // Actions
-  static const IconData copy = Icons.copy_all_rounded;
-  static const IconData share = Icons.share_outlined;
+  static const IconData style = Icons.style;
+  static const IconData eco = Icons.eco;
+  static const IconData cloud = Icons.cloud;
+  static const IconData code = Icons.code;
+  static const IconData musicNote = Icons.music_note;
+  static const IconData calculate = Icons.calculate;
 
-  // Favorites
-  static const IconData favorite = Icons.favorite_border;
-  static const IconData favoriteFilled = Icons.favorite;
-  static const IconData delete = Icons.delete_outline;
+  static const IconData add = Icons.add;
 
   // Status
   static const IconData error = Icons.error_outline;
