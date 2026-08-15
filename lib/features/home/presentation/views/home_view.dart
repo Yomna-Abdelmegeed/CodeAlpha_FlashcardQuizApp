@@ -1,4 +1,5 @@
 import 'package:flashcard_quiz_app/core/common/app_snack_bar.dart';
+import 'package:flashcard_quiz_app/core/routes/routes.dart';
 import 'package:flashcard_quiz_app/core/utils/assets/app_icons.dart';
 import 'package:flashcard_quiz_app/core/utils/assets/app_images.dart';
 import 'package:flashcard_quiz_app/core/widgets/buttons/main_button.dart';
@@ -10,6 +11,7 @@ import 'package:flashcard_quiz_app/features/home/presentation/views/widgets/deck
 import 'package:flashcard_quiz_app/features/home/presentation/views/widgets/create_deck_dialog.dart';
 import 'package:flashcard_quiz_app/features/home/presentation/views/widgets/empty_decks.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -111,6 +113,8 @@ class _HomeViewState extends State<HomeView> {
                             );
                           },
                           onTap: () {
+                            context.push(Routes.deckDetailsView, extra: deck);
+                            
                             AppSnackBar.success(
                               context,
                               'Opened deck: ${deck.title} (${deck.flashcardsCount} cards)',

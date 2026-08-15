@@ -1,3 +1,4 @@
+import 'package:flashcard_quiz_app/features/deck_details/presentation/views/deck_details_view.dart';
 import 'package:flashcard_quiz_app/features/home/presentation/views/home_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -25,6 +26,12 @@ class AppRouter {
       GoRoute(
         path: Routes.homeView,
         builder: (context, state) => const HomeView(),
+      ),
+
+      // deck details view
+      GoRoute(
+        path: Routes.deckDetailsView,
+        builder: (context, state) => const DeckDetailsView(),
       ),
     ],
   );
