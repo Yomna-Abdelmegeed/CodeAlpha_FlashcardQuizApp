@@ -38,7 +38,12 @@ class ErrorScreen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const Gap(24),
-            MainButton(text: 'Retry', onPressed: () {}, width: 140, height: 48),
+            MainButton(
+              text: 'Retry',
+              onPressed: onPressed,
+              width: 140,
+              height: 48,
+            ),
           ],
         ),
       ),

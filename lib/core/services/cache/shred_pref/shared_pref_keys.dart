@@ -1,5 +1,5 @@
 class SharedPrefKeys {
   SharedPrefKeys._();
 
-  //  static const String favoritesKey = 'favorite_Tests_list';
+  static const String decksKey = 'flasho_decks';
 }

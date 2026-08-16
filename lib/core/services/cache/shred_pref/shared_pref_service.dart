@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefService {
@@ -67,6 +69,34 @@ class SharedPrefService {
   //* this method to clear local database
   static Future<bool> clearData() async {
     return _sharedPreferences.clear();
+  }
+
+  //! ===============================
+  //! JSON Methods
+  //! ===============================
+
+  static Future<bool> setJson({
+    required String key,
+    required dynamic value,
+  }) async {
+    final jsonString = jsonEncode(value);
+
+    return await setString(
+      key: key,
+      value: jsonString,
+    );
+  }
+
+  static dynamic getJson({
+    required String key,
+  }) {
+    final jsonString = getString(key: key);
+
+    if (jsonString == null || jsonString.isEmpty) {
+      return null;
+    }
+
+    return jsonDecode(jsonString);
   }
 
   //! ===============================
