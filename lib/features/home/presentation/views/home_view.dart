@@ -3,61 +3,37 @@ import 'package:flashcard_quiz_app/core/routes/routes.dart';
 import 'package:flashcard_quiz_app/core/utils/assets/app_icons.dart';
 import 'package:flashcard_quiz_app/core/utils/assets/app_images.dart';
 import 'package:flashcard_quiz_app/core/widgets/buttons/main_button.dart';
+import 'package:flashcard_quiz_app/core/widgets/error_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flashcard_quiz_app/core/utils/colors/app_colors.dart';
 import 'package:flashcard_quiz_app/core/utils/styles/app_styles.dart';
 import 'package:flashcard_quiz_app/features/home/data/models/deck_model.dart';
+import 'package:flashcard_quiz_app/features/home/presentation/view_model/home_cubit.dart';
+import 'package:flashcard_quiz_app/features/home/presentation/view_model/home_state.dart';
 import 'package:flashcard_quiz_app/features/home/presentation/views/widgets/deck_card.dart';
 import 'package:flashcard_quiz_app/features/home/presentation/views/widgets/create_deck_dialog.dart';
 import 'package:flashcard_quiz_app/features/home/presentation/views/widgets/empty_decks.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-class HomeView extends StatefulWidget {
+class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
-  @override
-  State<HomeView> createState() => _HomeViewState();
-}
-
-class _HomeViewState extends State<HomeView> {
-  final List<DeckModel> _decks = [
-    const DeckModel(
-      id: '1',
-      title: 'Flutter Basics',
-      flashcardsCount: 12,
-      icon: AppIcons.style,
-    ),
-    const DeckModel(
-      id: '2',
-      title: 'Dart Basics',
-      flashcardsCount: 8,
-      icon: AppIcons.eco,
-    ),
-    const DeckModel(
-      id: '3',
-      title: 'Backend Basics',
-      flashcardsCount: 10,
-      icon: AppIcons.cloud,
-    ),
-  ];
-
-  void _showCreateDeckDialog() {
+  void _showCreateDeckDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return CreateDeckDialog(
           onDeckCreated: (title, icon) {
-            setState(() {
-              _decks.add(
-                DeckModel(
-                  id: DateTime.now().millisecondsSinceEpoch.toString(),
-                  title: title,
-                  flashcardsCount: 0,
-                  icon: icon,
-                ),
-              );
-            });
+            final newDeck = DeckModel(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              title: title,
+              flashcardsCount: 0,
+              icon: icon,
+            );
+
+            context.read<HomeCubit>().addDeck(newDeck);
 
             AppSnackBar.success(context, 'Deck "$title" created successfully!');
           },
@@ -96,14 +72,32 @@ class _HomeViewState extends State<HomeView> {
             ),
             const Gap(20),
             Expanded(
-              child: _decks.isEmpty
-                  ? const EmptyDecks()
-                  : ListView.separated(
-                      itemCount: _decks.length,
+              child: BlocBuilder<HomeCubit, HomeState>(
+                builder: (context, state) {
+                  if (state is HomeLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    );
+                  } else if (state is HomeError) {
+                    return ErrorScreen(
+                      onPressed: () {
+                        context.read<HomeCubit>().loadDecks();
+                      },
+                      errorMessage: state.message,
+                    );
+                  } else if (state is HomeSuccess) {
+                    final decks = state.decks;
+                    if (decks.isEmpty) {
+                      return const EmptyDecks();
+                    }
+                    return ListView.separated(
+                      itemCount: decks.length,
                       physics: const BouncingScrollPhysics(),
                       separatorBuilder: (context, index) => const Gap(16),
                       itemBuilder: (context, index) {
-                        final deck = _decks[index];
+                        final deck = decks[index];
                         return DeckCard(
                           deck: deck,
                           onStudyPressed: () {
@@ -114,7 +108,7 @@ class _HomeViewState extends State<HomeView> {
                           },
                           onTap: () {
                             context.push(Routes.deckDetailsView, extra: deck);
-                            
+
                             AppSnackBar.success(
                               context,
                               'Opened deck: ${deck.title} (${deck.flashcardsCount} cards)',
@@ -122,7 +116,11 @@ class _HomeViewState extends State<HomeView> {
                           },
                         );
                       },
-                    ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
             const Gap(16),
 
@@ -133,7 +131,7 @@ class _HomeViewState extends State<HomeView> {
                 child: MainButton(
                   width: 220,
                   height: 52,
-                  onPressed: _showCreateDeckDialog,
+                  onPressed: () => _showCreateDeckDialog(context),
                   text: 'New Deck',
                   icon: AppIcons.add,
                 ),

@@ -1,5 +1,8 @@
 import 'package:flashcard_quiz_app/core/services/network/api_consumer.dart';
 import 'package:flashcard_quiz_app/core/services/network/dio_consumer.dart';
+import 'package:flashcard_quiz_app/features/home/data/repo/deck_repo.dart';
+import 'package:flashcard_quiz_app/features/home/data/repo/deck_repo_impl.dart';
+import 'package:flashcard_quiz_app/features/home/presentation/view_model/home_cubit.dart';
 
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -13,6 +16,12 @@ void setupServiceLocator() {
   //! shared network services
   getIt.registerLazySingleton<Dio>(() => Dio());
   getIt.registerLazySingleton<ApiConsumer>(() => DioConsumer(getIt<Dio>()));
+
+  //! Home Feature
+  getIt.registerLazySingleton<DeckRepo>(
+    () => DeckRepoImpl(),
+  );
+  getIt.registerFactory<HomeCubit>(() => HomeCubit(getIt<DeckRepo>()));
 
   //? Splash Cubit
   // getIt.registerFactory<SplashCubit>(
