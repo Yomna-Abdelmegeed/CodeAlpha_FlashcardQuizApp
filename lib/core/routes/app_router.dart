@@ -1,7 +1,9 @@
 import 'package:flashcard_quiz_app/features/deck_details/presentation/views/deck_details_view.dart';
 import 'package:flashcard_quiz_app/features/home/presentation/views/home_view.dart';
 import 'package:flashcard_quiz_app/features/home/presentation/view_model/home_cubit.dart';
+import 'package:flashcard_quiz_app/features/home/data/models/deck_model.dart';
 import 'package:flashcard_quiz_app/core/di/service_locator.dart';
+import 'package:flashcard_quiz_app/features/study/presentation/views/study_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -34,10 +36,21 @@ class AppRouter {
         ),
       ),
 
-      // deck details view
+      //* deck details view
       GoRoute(
         path: Routes.deckDetailsView,
-        builder: (context, state) => const DeckDetailsView(),
+        builder: (context, state) {
+          final deck = state.extra as DeckModel?;
+          return DeckDetailsView(deck: deck);
+        },
+      ),
+
+      // * study view
+      GoRoute(
+        path: Routes.studyView,
+        builder: (context, state) {
+          return const StudyView();
+        },
       ),
     ],
   );

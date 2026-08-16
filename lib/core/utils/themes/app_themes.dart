@@ -15,12 +15,16 @@ class AppTheme {
         surface: AppColors.surface,
         error: AppColors.error,
       ),
+
+      //! AppBar Theme
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
       ),
+
+      //! Text Theme
       textTheme: TextTheme(
         titleLarge: AppStyles.bold20,
         titleMedium: AppStyles.medium16,
@@ -29,6 +33,8 @@ class AppTheme {
         bodySmall: AppStyles.regular12,
         labelLarge: AppStyles.bold15,
       ),
+
+      //! ElevatedButton Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -40,6 +46,20 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         ),
       ),
+
+      //! OutlinedButton Theme
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          backgroundColor: AppColors.surface,
+          side: const BorderSide(color: AppColors.primary, width: 1.5),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+      ),
+
+      //! Card Theme
       cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 0,
@@ -49,7 +69,7 @@ class AppTheme {
         ),
       ),
 
-      // TextFormField Theme
+      //! Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         hintStyle: AppStyles.regular14.copyWith(
           color: AppColors.textHint,

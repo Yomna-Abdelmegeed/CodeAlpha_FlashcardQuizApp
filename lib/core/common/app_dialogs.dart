@@ -146,7 +146,7 @@ class AppDialogs {
                         if (no != null)
                           Expanded(
                             child: SizedBox(
-                              height: 44,
+                              height: 50,
                               child: OutlinedButton(
                                 onPressed:
                                     onNoTap ??
@@ -177,11 +177,11 @@ class AppDialogs {
                         if (ok != null)
                           Expanded(
                             child: SizedBox(
-                              height: 44,
+                              height: 50,
                               child: ElevatedButton(
                                 onPressed: onTap,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
+                                  backgroundColor: AppColors.error,
                                   foregroundColor: Colors.white,
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(

@@ -3,9 +3,10 @@ class Routes {
 
   //* splash and welcome routes
   //  static const String splash = '/';
+  //* Main routes
+  static const String homeView = '/homeView';
 
   static const String deckDetailsView = '/deckDetailsView';
 
-  //* Main routes
-  static const String homeView = '/homeView';
+  static const String studyView = '/studyView';
 }
