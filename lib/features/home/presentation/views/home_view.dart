@@ -106,13 +106,15 @@ class HomeView extends StatelessWidget {
                               'Starting study session for "${deck.title}"!',
                             );
                           },
-                          onTap: () {
-                            context.push(Routes.deckDetailsView, extra: deck);
-
-                            AppSnackBar.success(
-                              context,
-                              'Opened deck: ${deck.title} (${deck.flashcardsCount} cards)',
+                          onTap: () async {
+                            await context.push(
+                              Routes.deckDetailsView,
+                              extra: deck,
                             );
+                            // Refresh Home list when returning from Deck Details
+                            if (context.mounted) {
+                              context.read<HomeCubit>().loadDecks();
+                            }
                           },
                         );
                       },

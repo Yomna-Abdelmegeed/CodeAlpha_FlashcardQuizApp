@@ -2,6 +2,9 @@ import 'package:flashcard_quiz_app/core/common/app_dialogs.dart';
 import 'package:flashcard_quiz_app/core/common/app_snack_bar.dart';
 import 'package:flashcard_quiz_app/core/routes/routes.dart';
 import 'package:flashcard_quiz_app/core/utils/assets/app_icons.dart';
+import 'package:flashcard_quiz_app/core/widgets/error_widget.dart';
+import 'package:flashcard_quiz_app/features/deck_details/presentation/view_model/deck_details_cubit.dart';
+import 'package:flashcard_quiz_app/features/deck_details/presentation/view_model/deck_details_state.dart';
 import 'package:flashcard_quiz_app/features/deck_details/presentation/views/widgets/deck_actions.dart';
 import 'package:flashcard_quiz_app/features/deck_details/presentation/views/widgets/deck_summary.dart';
 import 'package:flutter/material.dart';
@@ -12,101 +15,42 @@ import 'package:flashcard_quiz_app/features/deck_details/data/models/flashcard_m
 import 'package:flashcard_quiz_app/features/deck_details/presentation/views/widgets/flashcard_item.dart';
 import 'package:flashcard_quiz_app/features/deck_details/presentation/views/widgets/empty_flashcards.dart';
 import 'package:flashcard_quiz_app/features/deck_details/presentation/views/widgets/flashcard_form.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-class DeckDetailsView extends StatefulWidget {
-  final DeckModel? deck;
+class DeckDetailsView extends StatelessWidget {
+  final DeckModel deck;
 
-  const DeckDetailsView({super.key, this.deck});
-
-  @override
-  State<DeckDetailsView> createState() => _DeckDetailsViewState();
-}
-
-class _DeckDetailsViewState extends State<DeckDetailsView> {
-  late final DeckModel _currentDeck;
-  late final List<FlashcardModel> _flashcards;
-
-  @override
-  void initState() {
-    super.initState();
-    // Default fallback deck if none passed
-    _currentDeck =
-        widget.deck ??
-        const DeckModel(
-          id: 'default',
-          title: 'default',
-          flashcardsCount: 4,
-          icon: AppIcons.school,
-        );
-
-    // Initial mock data
-    _flashcards = [
-      const FlashcardModel(
-        id: '1',
-        question: 'What is Flutter?',
-        answer:
-            'Flutter is an open-source UI software development kit created by Google.',
-      ),
-      const FlashcardModel(
-        id: '2',
-        question: 'What is a Widget?',
-        answer:
-            'A widget is the basic building block of a Flutter user interface.',
-      ),
-      const FlashcardModel(
-        id: '3',
-        question: 'What is BuildContext?',
-        answer:
-            'BuildContext is a handle to the location of a widget in the widget tree.',
-      ),
-      const FlashcardModel(
-        id: '4',
-        question: 'What is StatefulWidget?',
-        answer:
-            'A widget that has mutable state. Useful for interactive content.',
-      ),
-    ];
-  }
+  const DeckDetailsView({super.key, required this.deck});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppBar(),
-
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Gap(16),
-
-            // Deck Summary - "X Flashcards" pill card
-            DeckSummary(flashcardsCount: _flashcards.length),
-
-            const Gap(24),
-
-            // Flashcards List
-            Expanded(child: _buildFlashcardsList()),
-            const Gap(16),
-
-            // Add Flashcard button
-            DeckActions(
-              onAddFlashcard: _showFlashcardForm,
-              onStudy: _flashcards.isEmpty
-                  ? null
-                  : () => context.push(Routes.studyView),
-            ),
-
-            const Gap(24),
-          ],
-        ),
-      ),
+    return BlocConsumer<DeckDetailsCubit, DeckDetailsState>(
+      listener: (context, state) {
+        if (state is DeckDetailsDeleted) {
+          AppSnackBar.success(context, 'Deck deleted successfully!');
+          Navigator.pop(context);
+        } else if (state is DeckDetailsError) {
+          AppSnackBar.error(context, state.message);
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: _buildAppBar(context, state),
+          body: _buildBody(context, state),
+        );
+      },
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context,
+    DeckDetailsState state,
+  ) {
+    // Use the deck title from the success state if available
+    final title = state is DeckDetailsSuccess ? state.deck.title : deck.title;
+
     return AppBar(
       centerTitle: true,
       leading: IconButton(
@@ -118,7 +62,7 @@ class _DeckDetailsViewState extends State<DeckDetailsView> {
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
-        _currentDeck.title,
+        title,
         style: AppStyles.bold24.copyWith(
           color: AppColors.primaryDark,
         ),
@@ -129,32 +73,99 @@ class _DeckDetailsViewState extends State<DeckDetailsView> {
             AppIcons.delete,
             color: AppColors.error,
           ),
-          onPressed: _confirmDeleteDeck,
+          onPressed: () => _confirmDeleteDeck(context),
         ),
       ],
     );
   }
 
-  Widget _buildFlashcardsList() {
-    if (_flashcards.isEmpty) {
+  Widget _buildBody(BuildContext context, DeckDetailsState state) {
+    if (state is DeckDetailsLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
+    }
+
+    if (state is DeckDetailsError) {
+      return ErrorScreen(
+        onPressed: () {
+          context.read<DeckDetailsCubit>().loadFlashcards(deck);
+        },
+        errorMessage: state.message,
+      );
+    }
+
+    if (state is DeckDetailsSuccess) {
+      return _buildSuccessBody(context, state);
+    }
+
+    // Initial / fallback
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildSuccessBody(BuildContext context, DeckDetailsSuccess state) {
+    final flashcards = state.flashcards;
+    final currentDeck = state.deck;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Gap(16),
+
+          // Deck Summary - "X Flashcards" pill card
+          DeckSummary(flashcardsCount: flashcards.length),
+
+          const Gap(24),
+
+          // Flashcards List
+          Expanded(
+            child: _buildFlashcardsList(context, currentDeck, flashcards),
+          ),
+          const Gap(16),
+
+          // Add Flashcard button + Study Deck button
+          DeckActions(
+            onAddFlashcard: () => _showFlashcardForm(context, currentDeck),
+            onStudy: flashcards.isEmpty
+                ? null
+                : () => context.push(Routes.studyView),
+          ),
+
+          const Gap(24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFlashcardsList(
+    BuildContext context,
+    DeckModel currentDeck,
+    List<FlashcardModel> flashcards,
+  ) {
+    if (flashcards.isEmpty) {
       return const EmptyFlashcards();
     }
 
     return ListView.separated(
       physics: const BouncingScrollPhysics(),
-      itemCount: _flashcards.length,
+      itemCount: flashcards.length,
       separatorBuilder: (_, _) => const Gap(16),
       itemBuilder: (context, index) {
-        final flashcard = _flashcards[index];
+        final flashcard = flashcards[index];
 
         return FlashcardItem(
           flashcard: flashcard,
           onEdit: () => _showFlashcardForm(
+            context,
+            currentDeck,
             flashcard: flashcard,
-            index: index,
           ),
           onDelete: () => _confirmDeleteFlashcard(
-            index,
+            context,
+            currentDeck,
+            flashcard,
           ),
         );
       },
@@ -162,9 +173,14 @@ class _DeckDetailsViewState extends State<DeckDetailsView> {
   }
 
   //* Shows the Add/Edit flashcard dialog.
-  // Pass [flashcard] and [index] when editing; omit both when adding.
-  void _showFlashcardForm({FlashcardModel? flashcard, int? index}) {
-    final isEditing = flashcard != null && index != null;
+  // Pass [flashcard] when editing; omit when adding.
+  void _showFlashcardForm(
+    BuildContext context,
+    DeckModel currentDeck, {
+    FlashcardModel? flashcard,
+  }) {
+    final isEditing = flashcard != null;
+    final cubit = context.read<DeckDetailsCubit>();
 
     showDialog(
       context: context,
@@ -174,45 +190,39 @@ class _DeckDetailsViewState extends State<DeckDetailsView> {
           initialQuestion: flashcard?.question,
           initialAnswer: flashcard?.answer,
           onSaved: (question, answer) {
-            setState(() {
-              final saved = FlashcardModel(
-                id:
-                    flashcard?.id ??
-                    DateTime.now().millisecondsSinceEpoch.toString(),
-                question: question,
-                answer: answer,
+            if (isEditing) {
+              cubit.updateFlashcard(
+                currentDeck,
+                flashcard.id,
+                question,
+                answer,
               );
-
-              if (isEditing) {
-                _flashcards[index] = saved;
-              } else {
-                _flashcards.add(saved);
-              }
-            });
-
-            AppSnackBar.success(
-              context,
-              isEditing
-                  ? 'Flashcard updated successfully!'
-                  : 'Flashcard added successfully!',
-            );
+              AppSnackBar.success(context, 'Flashcard updated successfully!');
+            } else {
+              cubit.addFlashcard(currentDeck, question, answer);
+              AppSnackBar.success(context, 'Flashcard added successfully!');
+            }
           },
         );
       },
     );
   }
 
-  void _confirmDeleteFlashcard(int index) {
-    return AppDialogs.showAlertDialog(
+  void _confirmDeleteFlashcard(
+    BuildContext context,
+    DeckModel currentDeck,
+    FlashcardModel flashcard,
+  ) {
+    final cubit = context.read<DeckDetailsCubit>();
+
+    AppDialogs.showAlertDialog(
       context,
       title: 'Delete Flashcard',
       subtitle: 'Are you sure you want to delete this flashcard?',
       ok: 'Delete',
       no: 'Cancel',
       onTap: () {
-        setState(() {
-          _flashcards.removeAt(index);
-        });
+        cubit.deleteFlashcard(currentDeck, flashcard.id);
         Navigator.pop(context);
         AppSnackBar.success(context, 'Flashcard deleted successfully!');
       },
@@ -220,7 +230,9 @@ class _DeckDetailsViewState extends State<DeckDetailsView> {
     );
   }
 
-  void _confirmDeleteDeck() {
+  void _confirmDeleteDeck(BuildContext context) {
+    final cubit = context.read<DeckDetailsCubit>();
+
     AppDialogs.showAlertDialog(
       context,
       title: 'Delete Deck',
@@ -228,14 +240,9 @@ class _DeckDetailsViewState extends State<DeckDetailsView> {
       ok: 'Delete',
       no: 'Cancel',
       onTap: () {
-        Navigator.pop(context);
-
-        AppSnackBar.success(
-          context,
-          'Deck deleted successfully!',
-        );
-
-        Navigator.pop(context);
+        Navigator.pop(context); // Close the dialog first
+        cubit.deleteDeck(deck.id);
+        // Navigation back happens in BlocConsumer listener on DeckDetailsDeleted
       },
       onNoTap: () => Navigator.pop(context),
     );

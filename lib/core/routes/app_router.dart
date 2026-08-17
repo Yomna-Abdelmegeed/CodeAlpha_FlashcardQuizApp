@@ -1,4 +1,5 @@
 import 'package:flashcard_quiz_app/features/deck_details/presentation/views/deck_details_view.dart';
+import 'package:flashcard_quiz_app/features/deck_details/presentation/view_model/deck_details_cubit.dart';
 import 'package:flashcard_quiz_app/features/home/presentation/views/home_view.dart';
 import 'package:flashcard_quiz_app/features/home/presentation/view_model/home_cubit.dart';
 import 'package:flashcard_quiz_app/features/home/data/models/deck_model.dart';
@@ -40,8 +41,12 @@ class AppRouter {
       GoRoute(
         path: Routes.deckDetailsView,
         builder: (context, state) {
-          final deck = state.extra as DeckModel?;
-          return DeckDetailsView(deck: deck);
+          final deck = state.extra as DeckModel;
+          return BlocProvider(
+            create: (context) =>
+                getIt<DeckDetailsCubit>()..loadFlashcards(deck),
+            child: DeckDetailsView(deck: deck),
+          );
         },
       ),
 

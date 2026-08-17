@@ -3,6 +3,9 @@ import 'package:flashcard_quiz_app/core/services/network/dio_consumer.dart';
 import 'package:flashcard_quiz_app/features/home/data/repo/deck_repo.dart';
 import 'package:flashcard_quiz_app/features/home/data/repo/deck_repo_impl.dart';
 import 'package:flashcard_quiz_app/features/home/presentation/view_model/home_cubit.dart';
+import 'package:flashcard_quiz_app/features/deck_details/data/repo/deck_details_repo.dart';
+import 'package:flashcard_quiz_app/features/deck_details/data/repo/deck_details_repo_impl.dart';
+import 'package:flashcard_quiz_app/features/deck_details/presentation/view_model/deck_details_cubit.dart';
 
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -22,6 +25,14 @@ void setupServiceLocator() {
     () => DeckRepoImpl(),
   );
   getIt.registerFactory<HomeCubit>(() => HomeCubit(getIt<DeckRepo>()));
+
+  //! Deck Details Feature
+  getIt.registerLazySingleton<DeckDetailsRepo>(
+    () => DeckDetailsRepoImpl(),
+  );
+  getIt.registerFactory<DeckDetailsCubit>(
+    () => DeckDetailsCubit(getIt<DeckDetailsRepo>()),
+  );
 
   //? Splash Cubit
   // getIt.registerFactory<SplashCubit>(
