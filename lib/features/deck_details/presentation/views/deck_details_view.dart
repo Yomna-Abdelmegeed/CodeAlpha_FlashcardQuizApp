@@ -36,7 +36,7 @@ class _DeckDetailsViewState extends State<DeckDetailsView> {
         widget.deck ??
         const DeckModel(
           id: 'default',
-          title: 'Flutter Basics',
+          title: 'default',
           flashcardsCount: 4,
           icon: AppIcons.school,
         );
@@ -93,7 +93,7 @@ class _DeckDetailsViewState extends State<DeckDetailsView> {
 
             // Add Flashcard button
             DeckActions(
-              onAddFlashcard: _showAddFlashcardDialog,
+              onAddFlashcard: _showFlashcardForm,
               onStudy: _flashcards.isEmpty
                   ? null
                   : () => context.push(Routes.studyView),
@@ -149,9 +149,9 @@ class _DeckDetailsViewState extends State<DeckDetailsView> {
 
         return FlashcardItem(
           flashcard: flashcard,
-          onEdit: () => _showEditFlashcardDialog(
-            flashcard,
-            index,
+          onEdit: () => _showFlashcardForm(
+            flashcard: flashcard,
+            index: index,
           ),
           onDelete: () => _confirmDeleteFlashcard(
             index,
@@ -161,46 +161,41 @@ class _DeckDetailsViewState extends State<DeckDetailsView> {
     );
   }
 
-  void _showAddFlashcardDialog() {
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return FlashcardForm(
-          title: 'Add Flashcard',
-          onSaved: (question, answer) {
-            setState(() {
-              _flashcards.add(
-                FlashcardModel(
-                  id: DateTime.now().millisecondsSinceEpoch.toString(),
-                  question: question,
-                  answer: answer,
-                ),
-              );
-            });
-            AppSnackBar.success(context, 'Flashcard added successfully!');
-          },
-        );
-      },
-    );
-  }
+  //* Shows the Add/Edit flashcard dialog.
+  // Pass [flashcard] and [index] when editing; omit both when adding.
+  void _showFlashcardForm({FlashcardModel? flashcard, int? index}) {
+    final isEditing = flashcard != null && index != null;
 
-  void _showEditFlashcardDialog(FlashcardModel flashcard, int index) {
     showDialog(
       context: context,
       builder: (dialogContext) {
         return FlashcardForm(
-          title: 'Edit Flashcard',
-          initialQuestion: flashcard.question,
-          initialAnswer: flashcard.answer,
+          title: isEditing ? 'Edit Flashcard' : 'Add Flashcard',
+          initialQuestion: flashcard?.question,
+          initialAnswer: flashcard?.answer,
           onSaved: (question, answer) {
             setState(() {
-              _flashcards[index] = FlashcardModel(
-                id: flashcard.id,
+              final saved = FlashcardModel(
+                id:
+                    flashcard?.id ??
+                    DateTime.now().millisecondsSinceEpoch.toString(),
                 question: question,
                 answer: answer,
               );
+
+              if (isEditing) {
+                _flashcards[index] = saved;
+              } else {
+                _flashcards.add(saved);
+              }
             });
-            AppSnackBar.success(context, 'Flashcard updated successfully!');
+
+            AppSnackBar.success(
+              context,
+              isEditing
+                  ? 'Flashcard updated successfully!'
+                  : 'Flashcard added successfully!',
+            );
           },
         );
       },
