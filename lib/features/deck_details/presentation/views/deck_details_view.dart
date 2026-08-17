@@ -57,7 +57,6 @@ class DeckDetailsView extends StatelessWidget {
         icon: const Icon(
           AppIcons.arrowBackIosNew,
           color: AppColors.primaryDark,
-          size: 20,
         ),
         onPressed: () => Navigator.pop(context),
       ),

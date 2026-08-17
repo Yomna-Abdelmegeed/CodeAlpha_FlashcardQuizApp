@@ -12,9 +12,10 @@ class MainButton extends StatelessWidget {
     this.textColor = Colors.white,
     this.gradientColors,
     this.width = double.infinity,
-    this.height = 56,
+    this.height = 50,
     this.borderRadius = 14,
     this.isLoading = false,
+    this.isIconInRight = false,
   });
 
   final String text;
@@ -32,6 +33,8 @@ class MainButton extends StatelessWidget {
 
   final bool isLoading;
 
+  final bool isIconInRight;
+
   @override
   Widget build(BuildContext context) {
     final colors = gradientColors ?? [AppColors.primary, AppColors.secondary];
@@ -39,9 +42,12 @@ class MainButton extends StatelessWidget {
     return Container(
       width: width,
       height: height,
+
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: colors,
+          colors: onPressed == null
+              ? [AppColors.disabled, AppColors.disabled]
+              : colors,
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
@@ -68,9 +74,10 @@ class MainButton extends StatelessWidget {
                   ),
                 )
               : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (icon != null) ...[
+                    if (icon != null && !isIconInRight) ...[
                       Icon(icon, size: 21, color: iconColor),
                       const SizedBox(width: 8),
                     ],
@@ -78,6 +85,10 @@ class MainButton extends StatelessWidget {
                       text,
                       style: AppStyles.bold18.copyWith(color: textColor),
                     ),
+                    if (icon != null && isIconInRight) ...[
+                      const SizedBox(width: 8),
+                      Icon(icon, size: 18, color: iconColor),
+                    ],
                   ],
                 ),
         ),

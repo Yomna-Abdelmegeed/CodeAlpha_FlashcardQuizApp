@@ -30,6 +30,10 @@ class AppIcons {
 
   static const IconData school = Icons.school;
 
+  static const IconData visibilityOff = Icons.visibility_off_outlined;
+
+  static const IconData visibility = Icons.visibility_outlined;
+
   // Status
   static const IconData error = Icons.error_outline;
 }
