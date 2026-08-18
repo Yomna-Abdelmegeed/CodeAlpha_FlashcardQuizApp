@@ -129,7 +129,7 @@ class DeckDetailsView extends StatelessWidget {
             onAddFlashcard: () => _showFlashcardForm(context, currentDeck),
             onStudy: flashcards.isEmpty
                 ? null
-                : () => context.push(Routes.studyView),
+                : () => context.push(Routes.studyView, extra: currentDeck),
           ),
 
           const Gap(24),

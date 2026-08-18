@@ -1,5 +1,6 @@
 import 'package:flashcard_quiz_app/features/deck_details/presentation/views/deck_details_view.dart';
 import 'package:flashcard_quiz_app/features/deck_details/presentation/view_model/deck_details_cubit.dart';
+import 'package:flashcard_quiz_app/features/study/presentation/view_model/study_cubit.dart';
 import 'package:flashcard_quiz_app/features/home/presentation/views/home_view.dart';
 import 'package:flashcard_quiz_app/features/home/presentation/view_model/home_cubit.dart';
 import 'package:flashcard_quiz_app/features/home/data/models/deck_model.dart';
@@ -54,7 +55,12 @@ class AppRouter {
       GoRoute(
         path: Routes.studyView,
         builder: (context, state) {
-          return const StudyView();
+          final deck = state.extra as DeckModel?;
+          return BlocProvider(
+            create: (context) =>
+                getIt<StudyCubit>()..loadFlashcards(deck?.id ?? ''),
+            child: StudyView(deckTitle: deck?.title ?? 'Study'),
+          );
         },
       ),
     ],

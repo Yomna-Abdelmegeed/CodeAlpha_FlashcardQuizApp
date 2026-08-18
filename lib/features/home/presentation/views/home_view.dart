@@ -101,6 +101,8 @@ class HomeView extends StatelessWidget {
                         return DeckCard(
                           deck: deck,
                           onStudyPressed: () {
+                            context.push(Routes.studyView, extra: deck);
+
                             AppSnackBar.success(
                               context,
                               'Starting study session for "${deck.title}"!',

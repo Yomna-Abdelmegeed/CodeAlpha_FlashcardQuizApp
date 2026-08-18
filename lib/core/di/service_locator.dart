@@ -6,6 +6,9 @@ import 'package:flashcard_quiz_app/features/home/presentation/view_model/home_cu
 import 'package:flashcard_quiz_app/features/deck_details/data/repo/deck_details_repo.dart';
 import 'package:flashcard_quiz_app/features/deck_details/data/repo/deck_details_repo_impl.dart';
 import 'package:flashcard_quiz_app/features/deck_details/presentation/view_model/deck_details_cubit.dart';
+import 'package:flashcard_quiz_app/features/study/data/repo/study_repo.dart';
+import 'package:flashcard_quiz_app/features/study/data/repo/study_repo_impl.dart';
+import 'package:flashcard_quiz_app/features/study/presentation/view_model/study_cubit.dart';
 
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -32,6 +35,14 @@ void setupServiceLocator() {
   );
   getIt.registerFactory<DeckDetailsCubit>(
     () => DeckDetailsCubit(getIt<DeckDetailsRepo>()),
+  );
+
+  //! Study Feature
+  getIt.registerLazySingleton<StudyRepo>(
+    () => StudyRepoImpl(),
+  );
+  getIt.registerFactory<StudyCubit>(
+    () => StudyCubit(getIt<StudyRepo>()),
   );
 
   //? Splash Cubit
