@@ -24,7 +24,7 @@
 
 ---
 <p align="center">
-  <img src="assets/images/flasho_demo.gif" alt="Flasho Demo" width="650"/>
+  <img src="assets/images/flasho_demo.gif" alt="Flasho Demo" width="100%"/>
 </p>
 
 ## 📖 Overview
